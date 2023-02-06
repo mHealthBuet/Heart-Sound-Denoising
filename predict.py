@@ -34,17 +34,25 @@ class CleanHeartSounds:
         for audiofile in self.audiofiles_dir.glob("*.wav"):
             audio, sampling_rate = load_audio(audiofile)
 
+            # Split audio in batches/chunks
             for i in range(0, len(audio), model_input_shape):
                 next_split = i + model_input_shape
                 chunk = audio[i:next_split]
 
+                # The last chunk may not have the 
+                # shape the model needs
                 if chunk.shape[0] == model_input_shape:
                     chunk = chunk.reshape((model_input_shape, -1))
                     self.audios.append(chunk)
 
+                    # Keep track which chunk corresponds
+                    # to which original audio
                     self.names.append(audiofile.stem)
 
         self.audios = array(self.audios)
+
+        # Transforms it to dictionary like:
+        # {0:audio1, 1: audio1, ..., j: audio2, ...}
         self.names = dict(enumerate(self.names))
 
     def predict(self, model_dir: str) -> array:
@@ -66,6 +74,9 @@ class CleanHeartSounds:
         Reverses the self.names dict attribute to have
         which indexes of the prediction batches are linked
         to the same original image
+
+        If self.names = {0:audio1, 1:audio1, 2:audio2}
+        then self.grouped = {audio1:[0,1], audio2:[2]}
         """
         
         self.grouped = {}
@@ -86,6 +97,8 @@ class CleanHeartSounds:
 
         for name, indexes in self.grouped.items():
             to_save = self.clean[indexes]
+            
+            # Join the list of lists into one
             to_save = list(chain(*to_save))
             to_save = array(to_save)
 
@@ -125,6 +138,8 @@ class CleanHeartSounds:
         Returns: None, waveform and spectogram comparison is displayed
         """
 
+        # Original
+
         orig_dir = Path(audiofile_dir)
         audio_name = orig_dir.stem
 
@@ -139,6 +154,8 @@ class CleanHeartSounds:
         orig_spec = amplitude_to_db(abs(orig_spec))
         specshow(orig_spec, sr=sampling_rate)
 
+        # Clean
+        
         clean_name = f"{audio_name}_clean"
         clean_dir = orig_dir.parent.joinpath("clean", clean_name + ".wav")
         clean_audio, sampling_rate = load_audio(clean_dir)
