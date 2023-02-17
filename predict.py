@@ -7,7 +7,6 @@ from scipy.io.wavfile import write as write_audio
 from matplotlib.pyplot import subplot, title, suptitle, show
 from librosa import load as load_audio, stft, amplitude_to_db
 
-
 class CleanHeartSounds:
     def __init__(self) -> None:
         pass
@@ -138,36 +137,35 @@ class CleanHeartSounds:
         Returns: None, waveform and spectogram comparison is displayed
         """
 
-        # Original
-
         orig_dir = Path(audiofile_dir)
         audio_name = orig_dir.stem
-
         orig_audio, sampling_rate = load_audio(orig_dir)
-
-        subplot(2, 2, 1)
-        waveshow(orig_audio, sr=sampling_rate)
-        title("Original")
-
-        subplot(2, 2, 3)
-        orig_spec = stft(orig_audio)
-        orig_spec = amplitude_to_db(abs(orig_spec))
-        specshow(orig_spec, sr=sampling_rate)
-
-        # Clean
 
         clean_name = f"{audio_name}_clean"
         clean_dir = orig_dir.parent.joinpath("clean", clean_name + ".wav")
         clean_audio, sampling_rate = load_audio(clean_dir)
 
-        subplot(2, 2, 2)
-        waveshow(clean_audio, sr=sampling_rate)
-        title("Clean")
+        ax1 = subplot(2, 2, 1)
+        waveshow(orig_audio, sr=sampling_rate)
+        lower_sound, upper_sound = ax1.get_ylim()
+        ax1.set_title("Original")
 
-        subplot(2, 2, 4)
+        ax2 = subplot(2, 2, 2)
+        waveshow(clean_audio, sr=sampling_rate)
+        ax2.set_ylim(lower_sound, upper_sound)
+        ax2.set_title("Clean")
+
+        ax3 = subplot(2, 2, 3)
+        orig_spec = stft(orig_audio)
+        orig_spec = amplitude_to_db(abs(orig_spec))
+        specshow(orig_spec, sr=sampling_rate)
+        lower_spec, upper_spec = ax3.get_ylim()
+
+        ax4 = subplot(2, 2, 4)
         clean_spec = stft(clean_audio)
         clean_spec = amplitude_to_db(abs(clean_spec))
         specshow(clean_spec, sr=sampling_rate)
+        ax4.set_ylim(lower_spec, upper_spec)
 
         suptitle(f'Waveform & spectrogram of "{audio_name}"')
         show()
