@@ -39,7 +39,7 @@ class CleanHeartSounds:
                 next_split = i + model_input_shape
                 chunk = audio[i:next_split]
 
-                # The last chunk may not have the 
+                # The last chunk may not have the
                 # shape the model needs
                 if chunk.shape[0] == model_input_shape:
                     chunk = chunk.reshape((model_input_shape, -1))
@@ -59,12 +59,12 @@ class CleanHeartSounds:
         """
         Import the model and predict
 
-        Args: model_dir: string directory name where 
+        Args: model_dir: string directory name where
             the model is placed
 
         Returns: an array representing the prediction
         """
-        
+
         self.model = load_model(model_dir)
         clean = self.model.predict(self.audios)
         return clean
@@ -78,7 +78,7 @@ class CleanHeartSounds:
         If self.names = {0:audio1, 1:audio1, 2:audio2}
         then self.grouped = {audio1:[0,1], audio2:[2]}
         """
-        
+
         self.grouped = {}
         for x, y in self.names.items():
             if y not in self.grouped:
@@ -91,13 +91,13 @@ class CleanHeartSounds:
         Creates a prediction folder, join th prediction
         batches and export them
         """
-        
+
         self.clean_dir = self.audiofiles_dir.joinpath("clean")
         self.clean_dir.mkdir(exist_ok=True)
 
         for name, indexes in self.grouped.items():
             to_save = self.clean[indexes]
-            
+
             # Join the list of lists into one
             to_save = list(chain(*to_save))
             to_save = array(to_save)
@@ -119,7 +119,7 @@ class CleanHeartSounds:
 
         Returns: an array representing the prediction
         """
-        
+
         self.get_audios(audiofiles_dir, model_input_shape)
         self.clean = self.predict(model_dir)
         self.group_clean()
@@ -155,7 +155,7 @@ class CleanHeartSounds:
         specshow(orig_spec, sr=sampling_rate)
 
         # Clean
-        
+
         clean_name = f"{audio_name}_clean"
         clean_dir = orig_dir.parent.joinpath("clean", clean_name + ".wav")
         clean_audio, sampling_rate = load_audio(clean_dir)
@@ -171,15 +171,3 @@ class CleanHeartSounds:
 
         suptitle(f'Waveform & spectrogram of "{audio_name}"')
         show()
-
-
-chs = CleanHeartSounds()
-
-clean = chs.clean_heart_sounds(
-    audiofiles_dir="Data/predict",
-    model_dir="Models/LU-Net.h5",
-    model_input_shape=800,
-)
-
-chs.compare_clean("Data/predict/PHS.wav")
-chs.compare_clean("Data/predict/ICBHI.wav")
