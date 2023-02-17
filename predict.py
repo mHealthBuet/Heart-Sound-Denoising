@@ -4,7 +4,7 @@ from itertools import chain
 from keras.models import load_model
 from librosa.display import waveshow, specshow
 from scipy.io.wavfile import write as write_audio
-from matplotlib.pyplot import subplot, title, suptitle, show
+from matplotlib.pyplot import subplot, suptitle, show
 from librosa import load as load_audio, stft, amplitude_to_db
 
 class CleanHeartSounds:
